@@ -13,7 +13,6 @@ app.get("/", (req, res) => {
 });
 
 
-console.log(process.env.DB_PASS)
 
 const uri =
   `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.tzxjncj.mongodb.net/?retryWrites=true&w=majority`;
@@ -30,6 +29,26 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+
+    const carDoctorServices=client.db("carDoctorDb").collection("services")
+    
+    app.get('/services',async(req,res)=>{
+        const query = {};
+        const options = {
+            projection: {title: 1, img: 1, price:1 },
+          };
+
+        const cursor = carDoctorServices.find(query,options);
+        const result =await cursor.toArray();
+        res.send(result);
+    })
+
+
+
+
+
+
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
@@ -37,7 +56,6 @@ async function run() {
     );
   } finally {
     // Ensures that the client will close when you finish/error
-    await client.close();
   }
 }
 run().catch(console.dir);
