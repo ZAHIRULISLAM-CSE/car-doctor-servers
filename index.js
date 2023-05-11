@@ -31,7 +31,8 @@ async function run() {
     await client.connect();
 
     const carDoctorServices=client.db("carDoctorDb").collection("services")
-    
+    const carDoctorBookings=client.db("carDoctorDb").collection("bookings")
+
     app.get('/services',async(req,res)=>{
         const query = {};
         const options = {
@@ -49,6 +50,12 @@ async function run() {
             const result = await carDoctorServices.findOne(query);
             res.send(result);      
     })
+
+    app.post("/bookings",async (req,res)=>{
+        const orderData=req.body;
+        const result = await carDoctorBookings.insertOne(orderData);
+        res.send(result);
+    } )
 
 
 
