@@ -51,6 +51,20 @@ async function run() {
             res.send(result);      
     })
 
+    //get bookings from database
+    app.get("/bookings", async  (req,res)=>{
+
+            let query={};
+
+            if(req.query?.email){
+                query={ email: req.query.email}
+            }
+            const cursor = carDoctorBookings.find(query);
+            const result= await cursor.toArray();
+            res.send(result);
+        }
+    )
+
     app.post("/bookings",async (req,res)=>{
         const orderData=req.body;
         const result = await carDoctorBookings.insertOne(orderData);
