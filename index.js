@@ -1,4 +1,5 @@
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+var jwt = require('jsonwebtoken');
 const express = require("express");
 require('dotenv').config()
 const app = express();
@@ -71,11 +72,32 @@ async function run() {
         res.send(result);
     } )
 
+    app.delete("/bookings/:id",async(req,res)=>{
+        const id =req.params.id;
+        const query={_id: new ObjectId(id)}
+        const result = await carDoctorBookings.deleteOne(query);
+        res.send(result);
+    })
 
+    app.patch("/bookings/:id",async (req,res)=>{
+        const id =req.params.id;
+        const data=req.body;
+        const query={_id: new ObjectId(id)}
+        const updateDoc = {
+            $set: {
+                status:data
+            },
+          };
+          const result = await carDoctorBookings.updateOne(query, updateDoc);
+          res.send(result);
+    } )
 
-
-
-
+    //jwt token related request
+    app.post("/jwt",(req,res)=>{
+        const user=req.body;
+        const token = jwt.sign(user,process.env.DB_ACCESS_TOKEN,{ expiresIn: '1h' });
+        res.send({token})
+    })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
