@@ -14,6 +14,21 @@ app.get("/", (req, res) => {
 });
 
 
+const verifyJWT=(req,res,next)=>{
+    const authorization=req.headers.authorization;
+    if(!authorization){
+      return res.status(401).send({error:true,message:"unauthorized access"})
+    }
+    const token=authorization;
+    jwt.verify(token, process.env.DB_ACCESS_TOKEN, (err, decoded)=>{
+        if(err){
+          return  res.status(403).send({error:true,message:"unauthorized access"})
+        }
+        req.decoded=decoded;
+        next();
+    });
+    
+  }
 
 const uri =
   `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.tzxjncj.mongodb.net/?retryWrites=true&w=majority`;
@@ -53,10 +68,12 @@ async function run() {
     })
 
     //get bookings from database
-    app.get("/bookings", async  (req,res)=>{
-
+    app.get("/bookings",verifyJWT, async  (req,res)=>{
+            const decoded=req.decoded;
+            if(decoded.email !=req.query.email){
+              res.status(403).send({error:true,message:"Forbidden"})
+            }
             let query={};
-
             if(req.query?.email){
                 query={ email: req.query.email}
             }
